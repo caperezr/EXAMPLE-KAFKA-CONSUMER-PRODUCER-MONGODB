@@ -30,27 +30,34 @@ public class SubscriptorProducerServiceImpl implements SubscriptorProducerServic
 
     @Override
     public void sendMessage(String message, String idUser, String idChanel) {
-        Chanel channel = chanelRepository.findById(idChanel)
-                .orElseThrow(() -> new IllegalArgumentException("Canal no encontrado"));
+        try {
+            Chanel channel = chanelRepository.findById(idChanel)
+                    .orElseThrow(() -> new IllegalArgumentException("Canal no encontrado"));
 
-        Optional<User> userOptional = userRepository.findById(idUser);
-        User user = userOptional.get();
+            Optional<User> userOptional = userRepository.findById(idUser);
+            User user = userOptional.get();
 
-        if (channel.getSubscribersList() == null) {
-            channel.setSubscribersList(new ArrayList<>());
+            if (channel.getSubscribersList() == null) {
+                channel.setSubscribersList(new ArrayList<>());
+            }
+
+            if (!channel.getSubscribersList().contains(user)) {
+                channel.getSubscribersList().add(user);
+                channel.setSubscribers(channel.getSubscribersList().size());
+                chanelRepository.save(channel);
+                message = user.getName()+" bienvenido al canal "+channel.getName() + " somos una familia muy grande contamos con "+channel.getSubscribers()+ " miembros";
+            } else {
+                message = user.getName()+" usted ya se encuentra suscrito al canal";
+            }
+
+            LOGGER.info(String.format("Alerta enviada -> %s", message));
+            kafkaTemplate.send(AppConstants.TOPIC_NAME, message);
+        } catch (IllegalArgumentException e) {
+            // Manejar la excepción aquí
+            LOGGER.error("Canal no encontrado: " + e.getMessage());
+            // Realizar cualquier acción adicional necesaria, como enviar una respuesta de error al cliente
         }
-
-        if (!channel.getSubscribersList().contains(user)) {
-            channel.getSubscribersList().add(user);
-            channel.setSubscribers(channel.getSubscribersList().size());
-            chanelRepository.save(channel);
-            message = user.getName()+" bienvenido al canal "+channel.getName() + " somos una familia muy grande contamos con "+channel.getSubscribers()+ " miembros";
-        } else {
-            message = user.getName()+" usted ya se encuentra suscrito al canal";
-        }
-
-        LOGGER.info(String.format("Alerta enviada -> %s", message));
-        kafkaTemplate.send(AppConstants.TOPIC_NAME, message);
     }
+
 
 }

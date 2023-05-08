@@ -20,7 +20,7 @@ public class SubscriptionProducerController {
                                           @PathVariable("message") String message) {
         try {
             subscriptorProducerService.sendMessage(message, userId, channelId);
-            return ResponseEntity.ok("Mensaje enviado al tópico de Kafka");
+            return ResponseEntity.ok("Alerta enviada al tópico de Kafka");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Canal no encontrado");
         }

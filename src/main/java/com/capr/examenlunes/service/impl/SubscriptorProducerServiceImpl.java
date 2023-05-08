@@ -50,14 +50,16 @@ public class SubscriptorProducerServiceImpl implements SubscriptorProducerServic
                 message = user.getName()+" usted ya se encuentra suscrito al canal";
             }
 
-            LOGGER.info(String.format("Alerta enviada -> %s", message));
-            kafkaTemplate.send(AppConstants.TOPIC_NAME, message);
+            LOGGER.info("Alerta enviada -> " + message);
         } catch (IllegalArgumentException e) {
-            // Manejar la excepción aquí
             LOGGER.error("Canal no encontrado: " + e.getMessage());
             // Realizar cualquier acción adicional necesaria, como enviar una respuesta de error al cliente
+            return;
         }
+
+        kafkaTemplate.send(AppConstants.TOPIC_NAME, message);
     }
+
 
 
 }

@@ -1,5 +1,6 @@
 package com.capr.examenlunes.controller;
 
+import com.capr.examenlunes.request.PublishRequest;
 import com.capr.examenlunes.service.SubscriptorProducerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,17 @@ public class SubscriptionProducerController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Canal no encontrado");
         }
     }
+
+    @PostMapping
+    public ResponseEntity<String> publish(@RequestBody PublishRequest request) {
+        try {
+            subscriptorProducerService.sendMessage("",request.getUserId(), request.getChannelId());
+            return ResponseEntity.ok("Alerta enviada al tópico de Kafka");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Canal no encontrado");
+        }
+    }
+
 
 
 
